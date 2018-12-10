@@ -28,6 +28,8 @@
 #include <QComboBox>
 #include <QAction>
 #include <QStyleFactory>
+#include <QHeaderView>
+#include <vector>
 #include "syntaxhighlighter.h"
 #include "highlighter.h"
 
@@ -35,7 +37,7 @@ class TextEditor : public QMainWindow{
     Q_OBJECT
 private:
     QTabWidget* m_tbw;
-    int m_CountFiles;
+    int m_CountDefaultFiles;
     QFileSystemModel *m_fileModel;
     struct Tab
         {
@@ -46,15 +48,24 @@ private:
     QComboBox* m_ComboBoxPath;
     QStringListModel* m_StringListModel;
     QStringList m_StringList;
+    std::vector<bool> m_VectorFlagsChanged;
 
     QDockWidget* Explorer;
     QDockWidget* ExplorerOpenDocs;
 
 public:
     TextEditor(QWidget* pwgt = 0);
+    virtual void dropEvent(QDropEvent* pe);
+    virtual void dragEnterEvent(QDragEnterEvent* pe)
+    {
+        if (pe->mimeData()->hasFormat("text/uri-list")) {
+        pe->acceptProposedAction();
+        }
+    }
 private slots:
     void slotNewDoc();
     void slotOpen();
+    void slotChanged();
     void slotSave();
     void slotSaveAs( );
     void slotSavePath();
