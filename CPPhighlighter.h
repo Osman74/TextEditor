@@ -1,18 +1,22 @@
-#ifndef SYNTAXHIGHLIGHTER_H
-#define SYNTAXHIGHLIGHTER_H
+#ifndef CPPHIGHLIGHTER_H
+#define CPPHIGHLIGHTER_H
 
 #include <QSyntaxHighlighter>
-#include <QTextCharFormat>
+#include <QtXml/QtXml>
+#include <cstdlib>
 
-class SyntaxHighlighter : public QSyntaxHighlighter
+class CPPHighlighter : public QSyntaxHighlighter
 {
     Q_OBJECT
 
 public:
-    explicit SyntaxHighlighter(QTextDocument *parent = 0);
+public:
+    CPPHighlighter(QString XMLFilename, QTextDocument *parent = 0);
+    void traverseNode(const QDomNode& node, QStringList& keywordPatterns);
 
 protected:
-    void highlightBlock(const QString &text);
+    void highlightBlock(const QString &text) override;
+
 
 private:
     struct HighlightingRule
@@ -32,4 +36,4 @@ private:
     QTextCharFormat quotationFormat;
     QTextCharFormat functionFormat;
 };
-#endif // SYNTAXHIGHLIGHTER_H
+#endif // CPPHIGHLIGHTER_H

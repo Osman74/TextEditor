@@ -1,9 +1,10 @@
 <RCC>
     <qresource prefix="/new/prefix1">
-        <file>New.png</file>
-        <file>Open.png</file>
-        <file>Save.png</file>
-        <file>SaveAll.png</file>
-        <file>text-editor.png</file>
+        <file>resourses/New.png</file>
+        <file>resourses/Open.png</file>
+        <file>resourses/Save.png</file>
+        <file>resourses/SaveAll.png</file>
+        <file>resourses/SaveAs.png</file>
+        <file>resourses/text-editor.png</file>
     </qresource>
 </RCC>

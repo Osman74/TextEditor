@@ -27,14 +27,16 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     texteditor.cpp \
-    syntaxhighlighter.cpp \
-    highlighter.cpp
+    highlighter.cpp \
+    formsyntax.cpp \
+    CPPhighlighter.cpp
 
 HEADERS += \
         mainwindow.h \
     texteditor.h \
-    syntaxhighlighter.h \
-    highlighter.h
+    highlighter.h \
+    formsyntax.h \
+    CPPhighlighter.h
 
 FORMS += \
         mainwindow.ui

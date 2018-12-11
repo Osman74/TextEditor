@@ -30,8 +30,10 @@
 #include <QStyleFactory>
 #include <QHeaderView>
 #include <vector>
-#include "syntaxhighlighter.h"
+#include "CPPhighlighter.h"
 #include "highlighter.h"
+#include "CPPhighlighter.h"
+#include "formsyntax.h"
 
 class TextEditor : public QMainWindow{
     Q_OBJECT
@@ -53,8 +55,11 @@ private:
     QDockWidget* Explorer;
     QDockWidget* ExplorerOpenDocs;
 
+    FormSyntax* m_FormSyntax;
 public:
     TextEditor(QWidget* pwgt = 0);
+protected:
+    virtual void closeEvent(QCloseEvent*);
     virtual void dropEvent(QDropEvent* pe);
     virtual void dragEnterEvent(QDragEnterEvent* pe)
     {
@@ -80,8 +85,11 @@ private slots:
     void slotSelectAll();
     void slotViewExplorer(bool);
     void slotViewExplorerOpenDocuments(bool);
-    void slotSetCurrentDoc(QModelIndex);
+    void slotExplorerSetDoc(QModelIndex);
+    void slotSetCurrentDoc(int);
     void slotCloseTab(int);
     void slotSelectCPP();
+    void slotSelectSyntax();
+    void slotAddSyntax();
 };
 #endif // TEXTEDITOR_H

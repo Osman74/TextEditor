@@ -4,7 +4,7 @@ TextEditor::TextEditor(QWidget* pwgt){
     setAcceptDrops(true);
     setStyle(QStyleFactory::create("Fusion"));
     setWindowTitle("TextEditor");
-    setWindowIcon(QIcon(":new/prefix1/text-editor.png"));
+    setWindowIcon(QIcon(":new/prefix1/resourses/text-editor.png"));
     QToolBar* ptb = new QToolBar("Панель инструментов");
     ptb->setStyleSheet("background-color:darkgray;");
     QMenu* pmnuFile = new QMenu("Файл");
@@ -14,7 +14,7 @@ TextEditor::TextEditor(QWidget* pwgt){
     pactNew -> setToolTip ("Создать новый документ");
     pactNew -> setStatusTip ("Создание нового файла");
     pactNew -> setWhatsThis ("Создание нового файла");
-    pactNew -> setIcon (QPixmap(":new/prefix1/New.png"));
+    pactNew -> setIcon (QPixmap(":new/prefix1/resourses/New.png"));
     connect (pactNew, SIGNAL(triggered()), SLOT(slotNewDoc()));
     ptb->addAction(pactNew);
     pmnuFile->addAction(pactNew);
@@ -25,7 +25,7 @@ TextEditor::TextEditor(QWidget* pwgt){
     pactOpen -> setToolTip ("Открыть файл");
     pactOpen -> setStatusTip ("Открытие файла");
     pactOpen -> setWhatsThis ("Открытие файла");
-    pactOpen -> setIcon (QPixmap(":new/prefix1/Open.png"));
+    pactOpen -> setIcon (QPixmap(":new/prefix1/resourses/Open.png"));
     connect (pactOpen, SIGNAL(triggered()), SLOT(slotOpen()));
     ptb->addAction(pactOpen);
     pmnuFile->addAction(pactOpen);
@@ -37,7 +37,7 @@ TextEditor::TextEditor(QWidget* pwgt){
     pactSave -> setToolTip ("Сохранить файл");
     pactSave -> setStatusTip ("Сохранение файла");
     pactSave -> setWhatsThis ("Сохранение файла");
-    pactSave -> setIcon (QPixmap(":new/prefix1/Save.png"));
+    pactSave -> setIcon (QPixmap(":new/prefix1/resourses/Save.png"));
     connect (pactSave, SIGNAL(triggered()), SLOT(slotSave()));
     ptb->addAction(pactSave);
     pmnuFile->addAction(pactSave);
@@ -49,11 +49,10 @@ TextEditor::TextEditor(QWidget* pwgt){
     pactSaveAll -> setToolTip ("Сохранить все файлы");
     pactSaveAll -> setStatusTip ("Сохранение всех файлов");
     pactSaveAll -> setWhatsThis ("Сохранение всех файлов");
-    pactSaveAll -> setIcon (QPixmap(":new/prefix1/SaveAll.png"));
+    pactSaveAll -> setIcon (QPixmap(":new/prefix1/resourses/SaveAll.png"));
     connect (pactSaveAll, SIGNAL(triggered()), SLOT(slotSaveAll()));
     ptb->addAction(pactSaveAll);
     pmnuFile->addAction(pactSaveAll);
-
     pmnuFile->addAction("Закрыть", this, SLOT(slotClose()));
     pmnuFile->addAction("Закрыть все", this, SLOT(slotCloseAll()));
     pmnuFile->addAction("Выход", this, SLOT(slotExit()));
@@ -82,7 +81,7 @@ TextEditor::TextEditor(QWidget* pwgt){
 
     QMenu* pmnuSyntax = new QMenu("Синтаксисы");
     pmnuSyntax->addAction("C++", this, SLOT(slotSelectCPP()));
-    pmnuSyntax->addAction("Добавить свой синтаксис");
+    pmnuSyntax->addAction("Добавить свой синтаксис", this, SLOT(slotAddSyntax()));
     this->menuBar()->addMenu(pmnuSyntax);
 
     m_tbw = new QTabWidget;
@@ -123,8 +122,15 @@ TextEditor::TextEditor(QWidget* pwgt){
 
     m_CountDefaultFiles = 0;
 
+    m_FormSyntax = new FormSyntax();
+    m_FormSyntax->setWindowTitle("Свой синтаксис");
+    m_FormSyntax->setWindowIcon(QIcon(":new/prefix1/resourses/text-editor.png"));
+    m_FormSyntax->resize(700, 500);
+    connect(m_FormSyntax, SIGNAL(signalClose()), this, SLOT(slotSelectSyntax()));
+
     connect(m_tbw, SIGNAL(tabCloseRequested(int)), this, SLOT(slotCloseTab(int)));
-    connect(listView, SIGNAL(clicked(QModelIndex)), this, SLOT(slotSetCurrentDoc(QModelIndex)));
+    connect(listView, SIGNAL(clicked(QModelIndex)), this, SLOT(slotExplorerSetDoc(QModelIndex)));
+    connect(m_tbw, SIGNAL(tabBarClicked(int)), this, SLOT(slotSetCurrentDoc(int)));
     connect(ExplorerOpenDocs, SIGNAL(visibilityChanged(bool)), pactViewExplorerOpenDocuments, SLOT(setChecked(bool)));
     connect(Explorer, SIGNAL(visibilityChanged(bool)), pactViewExplorer, SLOT(setChecked(bool)));
 }
@@ -141,6 +147,7 @@ void TextEditor::slotNewDoc()
         QString countFiles(charCountFiles);
         m_tbw->addTab(TE, QString("Новый документ(") + countFiles + QString(").txt"));
         m_StringList.push_back(QString("Новый документ(") + countFiles + QString(").txt"));
+        setWindowTitle(QString("Новый документ(") + countFiles + QString(").txt"));
     }
     else
     {
@@ -149,6 +156,7 @@ void TextEditor::slotNewDoc()
     }
     m_StringListModel->setStringList(m_StringList);
     m_VectorFlagsChanged.push_back(false);
+    m_tbw->setCurrentIndex(m_tbw->count() - 1);
     connect(TE, SIGNAL(textChanged()), this, SLOT(slotChanged()));
 }
 
@@ -159,7 +167,7 @@ void TextEditor::slotOpen()
                                               "Открыть файл",
                                               QDir::current().dirName(),
                                               "Все файлы(*.*);;Текстовые файлы(*.txt)");
-     qDebug() << h;
+     if(h.isEmpty()) return;
      QFile file(h);
      QString str;
      QString Text;
@@ -174,21 +182,21 @@ void TextEditor::slotOpen()
      TE->setText(Text);
      QFileInfo fInfo(file);
      m_tbw->addTab(TE, fInfo.baseName() + "." + fInfo.completeSuffix());
+     setWindowTitle(fInfo.baseName() + "." + fInfo.completeSuffix());
      m_StringList.push_back(fInfo.baseName());
      m_StringListModel->setStringList(m_StringList);
-     m_VectorFlagsChanged.push_back(false);
      if((fInfo.completeSuffix() == "h") || ((fInfo.completeSuffix() == "cpp")))
      {
-         qDebug() << "OK";
-         new Highlighter("cppHighlight.xml", TE->document());
+         new CPPHighlighter("CPPSyntax.xml", TE->document());
      }
      file.close();
+     m_tbw->setCurrentIndex(m_tbw->count() - 1);
+     m_VectorFlagsChanged.push_back(false);
      connect(TE, SIGNAL(textChanged()), this, SLOT(slotChanged()));
 }
 
 void TextEditor::slotChanged()
 {
-    qDebug() << "OK";
     m_VectorFlagsChanged[m_tbw->currentIndex()] = true;
 }
 
@@ -244,6 +252,7 @@ void TextEditor::slotSaveAll()
 
 void TextEditor::slotClose()
 {
+    int p_Ind = m_tbw->currentIndex();
     if(m_VectorFlagsChanged[m_tbw->currentIndex()] == true)
     {
         QMessageBox* pmbx =
@@ -258,17 +267,17 @@ void TextEditor::slotClose()
         if (n == QMessageBox::Yes)
         {
             slotSave();
-            m_tbw->removeTab(m_tbw->currentIndex());
+            m_tbw->removeTab(p_Ind);
         }
         if (n == QMessageBox::No)
         {
-            m_tbw->removeTab(m_tbw->currentIndex());
+            m_tbw->removeTab(p_Ind);
         }
     }
-    else m_tbw->removeTab(m_tbw->currentIndex());
-    m_StringList.removeAt(m_tbw->currentIndex());
-    m_VectorFlagsChanged.erase(m_VectorFlagsChanged.begin() + m_tbw->currentIndex());
+    else m_tbw->removeTab(p_Ind);
+    m_StringList.removeAt(p_Ind);
     m_StringListModel->setStringList(m_StringList);
+    m_VectorFlagsChanged.erase(m_VectorFlagsChanged.begin() + p_Ind);
 }
 
 void TextEditor::slotCloseAll()
@@ -304,10 +313,7 @@ void TextEditor::slotCloseAll()
         m_VectorFlagsChanged.erase(m_VectorFlagsChanged.begin());
         m_StringListModel->setStringList(m_StringList);
     }
-//    m_tbw->clear();
-//    m_StringList.clear();
-//    m_VectorFlagsChanged.clear();
-//    m_StringListModel->setStringList(m_StringList);
+    m_tbw->setWindowTitle("TextEditor");
 }
 
 void TextEditor::slotExit()
@@ -353,15 +359,23 @@ void TextEditor::slotViewExplorerOpenDocuments(bool flag)
 }
 
 
-void TextEditor::slotSetCurrentDoc(QModelIndex p_Index)
+void TextEditor::slotExplorerSetDoc(QModelIndex p_Index)
 {
     m_tbw->setCurrentIndex(p_Index.row());
+    setWindowTitle(m_StringList.at(p_Index.row()));
+}
+
+void TextEditor::slotSetCurrentDoc(int p_Index)
+{
+    qDebug() << "SetCurrent";
+    setWindowTitle(m_StringList.at(p_Index));
 }
 
 void TextEditor::slotCloseTab(int p_Ind)
 {
     if(m_VectorFlagsChanged[p_Ind] == true)
     {
+        qDebug() << "1";
         QMessageBox* pmbx =
          new QMessageBox(QMessageBox::Information,
          "MessageBox",
@@ -389,7 +403,7 @@ void TextEditor::slotCloseTab(int p_Ind)
 void TextEditor::slotSelectCPP()
 {
     QTextEdit* TE = (QTextEdit*)(m_tbw->currentWidget());
-    new Highlighter("cppHighlight.xml", TE->document());
+    new CPPHighlighter("CPPSyntax.xml", TE->document());
 }
 
 void TextEditor::dropEvent(QDropEvent *pe)
@@ -405,10 +419,8 @@ void TextEditor::dropEvent(QDropEvent *pe)
             QTextStream TS(&file);
             if (file.open(QIODevice::ReadOnly))
             {
-                qDebug() << "1";
                 while(!TS.atEnd())
                 {
-                   qDebug() << "2";
                    TS.readLineInto(&str);
                    str.append("\n");
                    Text.append(str);
@@ -417,6 +429,7 @@ void TextEditor::dropEvent(QDropEvent *pe)
             TE->setText(Text);
             QFileInfo fInfo(file);
             m_tbw->addTab(TE, fInfo.baseName() + "." + fInfo.completeSuffix());
+            setWindowTitle(fInfo.baseName() + "." + fInfo.completeSuffix());
             m_StringList.push_back(fInfo.baseName());
             m_StringListModel->setStringList(m_StringList);
             if((fInfo.completeSuffix() == "h") || ((fInfo.completeSuffix() == "cpp")))
@@ -426,4 +439,20 @@ void TextEditor::dropEvent(QDropEvent *pe)
             }
             file.close();
     }
+}
+
+void TextEditor::closeEvent(QCloseEvent*)
+{
+    slotCloseAll();
+}
+
+void TextEditor::slotAddSyntax()
+{
+    m_FormSyntax->show();
+}
+
+void TextEditor::slotSelectSyntax()
+{
+    QTextEdit* TE = (QTextEdit*)(m_tbw->currentWidget());
+    new Highlighter("UserSyntax.xml", TE->document());
 }

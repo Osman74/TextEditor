@@ -3,6 +3,7 @@
 
 #include <QSyntaxHighlighter>
 #include <QtXml/QtXml>
+#include <cstdlib>
 
 class Highlighter : public QSyntaxHighlighter
 {
