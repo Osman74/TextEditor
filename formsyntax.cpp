@@ -45,7 +45,21 @@ void FormSyntax::createXML()
     itoa(g, c2, 16);
     itoa(b, c3, 16);
     char HEX[7];
-
+    if(c1[1] == '\0')
+    {
+        c1[1] = c1[0];
+        c1[0] = '0';
+    }
+    if(c2[1] == '\0')
+    {
+        c2[1] = c2[0];
+        c2[0] = '0';
+    }
+    if(c3[1] == '\0')
+    {
+        c3[1] = c3[0];
+        c3[0] = '0';
+    }
     HEX[0] = c1[0];
     HEX[1] = c1[1];
     HEX[2] = c2[0];
@@ -58,10 +72,6 @@ void FormSyntax::createXML()
             HEX[i]='0';
     }
     QDomElement color = Color(domEl, doc, HEX);
-    qDebug() << c1;
-    qDebug() << c2;
-    qDebug() << c3;
-    qDebug() << HEX;
     domElement.appendChild(color);
     QFile file ("UserSyntax.xml");
     if(file.open(QIODevice::WriteOnly))

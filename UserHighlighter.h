@@ -1,16 +1,16 @@
-#ifndef HIGHLIGHTER_H
-#define HIGHLIGHTER_H
+#ifndef USERUserHighlighter_H
+#define USERUserHighlighter_H
 
 #include <QSyntaxHighlighter>
 #include <QtXml/QtXml>
 #include <cstdlib>
 
-class Highlighter : public QSyntaxHighlighter
+class UserHighlighter : public QSyntaxHighlighter
 {
     Q_OBJECT
 
 public:
-    Highlighter(QString XMLFilename, QTextDocument *parent = 0);
+    UserHighlighter(QString XMLFilename, QTextDocument *parent = 0);
     void traverseNode(const QDomNode& node, QStringList& keywordPatterns);
 
 protected:
@@ -36,4 +36,4 @@ private:
     QTextCharFormat functionFormat;
 };
 
-#endif // HIGHLIGHTER_H
+#endif // Highlighter_H

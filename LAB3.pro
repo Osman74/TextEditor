@@ -25,21 +25,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
     texteditor.cpp \
-    highlighter.cpp \
     formsyntax.cpp \
-    CPPhighlighter.cpp
+    UserHighlighter.cpp \
+    Highlighter.cpp
 
 HEADERS += \
-        mainwindow.h \
     texteditor.h \
-    highlighter.h \
     formsyntax.h \
-    CPPhighlighter.h
+    UserHighlighter.h \
+    Highlighter.h
 
-FORMS += \
-        mainwindow.ui
+FORMS +=
 
 RESOURCES += \
     iconsdoc.qrc

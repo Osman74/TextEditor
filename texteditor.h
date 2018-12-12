@@ -30,9 +30,8 @@
 #include <QStyleFactory>
 #include <QHeaderView>
 #include <vector>
-#include "CPPhighlighter.h"
-#include "highlighter.h"
-#include "CPPhighlighter.h"
+#include "Highlighter.h"
+#include "UserHighlighter.h"
 #include "formsyntax.h"
 
 class TextEditor : public QMainWindow{

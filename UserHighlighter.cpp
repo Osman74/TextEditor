@@ -1,8 +1,8 @@
-#include "cpphighlighter.h"
+#include "UserHighlighter.h"
 #include <string>
 #include <QColor>
 
-void CPPHighlighter::traverseNode(const QDomNode& node, QStringList& keywordPatterns)
+void UserHighlighter::traverseNode(const QDomNode& node, QStringList& keywordPatterns)
 {
     QDomNode domNode = node.firstChild();
     while(!domNode.isNull()) {
@@ -44,7 +44,7 @@ void CPPHighlighter::traverseNode(const QDomNode& node, QStringList& keywordPatt
     }
 }
 
-CPPHighlighter::CPPHighlighter(QString XMLFilename, QTextDocument *parent)
+UserHighlighter::UserHighlighter(QString XMLFilename, QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
     HighlightingRule rule;
@@ -70,40 +70,9 @@ CPPHighlighter::CPPHighlighter(QString XMLFilename, QTextDocument *parent)
         rule.format = keywordFormat;
         highlightingRules.append(rule);
     }
-
-    classFormat.setFontWeight(QFont::Bold);
-    classFormat.setForeground(Qt::darkMagenta);
-    rule.pattern = QRegExp("\\bQ[A-Za-z]+\\b");
-    rule.format = classFormat;
-    highlightingRules.append(rule);
-
-
-    singleLineCommentFormat.setForeground(Qt::gray);
-    rule.pattern = QRegExp("//[^\n]*");
-    rule.format = singleLineCommentFormat;
-    highlightingRules.append(rule);
-
-    multiLineCommentFormat.setForeground(Qt::gray);
-
-
-    quotationFormat.setForeground(Qt::darkGreen);
-    rule.pattern = QRegExp("\".*\"");
-    rule.format = quotationFormat;
-    highlightingRules.append(rule);
-
-
-    functionFormat.setFontItalic(true);
-    functionFormat.setForeground(Qt::blue);
-    rule.pattern = QRegExp("\\b[A-Za-z0-9_]+(?=\\()");
-    rule.format = functionFormat;
-    highlightingRules.append(rule);
-
-
-    commentStartExpression = QRegExp("/\\*");
-    commentEndExpression = QRegExp("\\*/");
 }
 
-void CPPHighlighter::highlightBlock(const QString &text)
+void UserHighlighter::highlightBlock(const QString &text)
 {
     foreach (const HighlightingRule &rule, highlightingRules) {
         QRegExp expression(rule.pattern);
@@ -116,23 +85,4 @@ void CPPHighlighter::highlightBlock(const QString &text)
     }
 
     setCurrentBlockState(0);
-
-
-    int startIndex = 0;
-    if (previousBlockState() != 1)
-        startIndex = commentStartExpression.indexIn(text);
-
-    while (startIndex >= 0) {
-        int endIndex = commentEndExpression.indexIn(text, startIndex);
-        int commentLength;
-        if (endIndex == -1) {
-            setCurrentBlockState(1);
-            commentLength = text.length() - startIndex;
-        } else {
-            commentLength = endIndex - startIndex
-                            + commentEndExpression.matchedLength();
-        }
-        setFormat(startIndex, commentLength, multiLineCommentFormat);
-        startIndex = commentStartExpression.indexIn(text, startIndex + commentLength);
-    }
 }

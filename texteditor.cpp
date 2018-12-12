@@ -185,10 +185,7 @@ void TextEditor::slotOpen()
      setWindowTitle(fInfo.baseName() + "." + fInfo.completeSuffix());
      m_StringList.push_back(fInfo.baseName());
      m_StringListModel->setStringList(m_StringList);
-     if((fInfo.completeSuffix() == "h") || ((fInfo.completeSuffix() == "cpp")))
-     {
-         new CPPHighlighter("CPPSyntax.xml", TE->document());
-     }
+     new Highlighter("Syntax.xml", fInfo.completeSuffix(), TE->document());
      file.close();
      m_tbw->setCurrentIndex(m_tbw->count() - 1);
      m_VectorFlagsChanged.push_back(false);
@@ -403,41 +400,39 @@ void TextEditor::slotCloseTab(int p_Ind)
 void TextEditor::slotSelectCPP()
 {
     QTextEdit* TE = (QTextEdit*)(m_tbw->currentWidget());
-    new CPPHighlighter("CPPSyntax.xml", TE->document());
+    new Highlighter("Syntax.xml", "cpp", TE->document());
 }
 
 void TextEditor::dropEvent(QDropEvent *pe)
 {
     QList<QUrl> urlList = pe->mimeData()->urls();
     foreach(QUrl url, urlList) {
-            QTextEdit* TE = new QTextEdit;
-            QString path = url.path();
-            path.remove(0, 1);
-            QFile file(path);
-            QString str;
-            QString Text;
-            QTextStream TS(&file);
-            if (file.open(QIODevice::ReadOnly))
-            {
-                while(!TS.atEnd())
+        QTextEdit* TE = new QTextEdit;
+        QString path = url.path();
+        path.remove(0, 1);
+        QFile file(path);
+        QString str;
+        QString Text;
+        QTextStream TS(&file);
+        if (file.open(QIODevice::ReadOnly))
+        {
+            while(!TS.atEnd())
                 {
                    TS.readLineInto(&str);
                    str.append("\n");
                    Text.append(str);
                 }
-            }
-            TE->setText(Text);
-            QFileInfo fInfo(file);
-            m_tbw->addTab(TE, fInfo.baseName() + "." + fInfo.completeSuffix());
-            setWindowTitle(fInfo.baseName() + "." + fInfo.completeSuffix());
-            m_StringList.push_back(fInfo.baseName());
-            m_StringListModel->setStringList(m_StringList);
-            if((fInfo.completeSuffix() == "h") || ((fInfo.completeSuffix() == "cpp")))
-            {
-                qDebug() << "OK";
-                new Highlighter("cppHighlight.xml", TE->document());
-            }
-            file.close();
+         }
+         TE->setText(Text);
+         QFileInfo fInfo(file);
+         m_tbw->addTab(TE, fInfo.baseName() + "." + fInfo.completeSuffix());
+         setWindowTitle(fInfo.baseName() + "." + fInfo.completeSuffix());
+         m_StringList.push_back(fInfo.baseName());
+         m_StringListModel->setStringList(m_StringList);
+         new Highlighter("Syntax.xml", fInfo.completeSuffix(), TE->document());
+         m_VectorFlagsChanged.push_back(false);
+         file.close();
+         connect(TE, SIGNAL(textChanged()), this, SLOT(slotChanged()));
     }
 }
 
@@ -454,5 +449,5 @@ void TextEditor::slotAddSyntax()
 void TextEditor::slotSelectSyntax()
 {
     QTextEdit* TE = (QTextEdit*)(m_tbw->currentWidget());
-    new Highlighter("UserSyntax.xml", TE->document());
+    new UserHighlighter("UserSyntax.xml", TE->document());
 }
