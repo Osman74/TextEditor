@@ -156,6 +156,7 @@ void TextEditor::slotNewDoc()
     }
     m_StringListModel->setStringList(m_StringList);
     m_VectorFlagsChanged.push_back(false);
+    m_VectorFlagsNewDoc.push_back(true);
     m_tbw->setCurrentIndex(m_tbw->count() - 1);
     connect(TE, SIGNAL(textChanged()), this, SLOT(slotChanged()));
 }
@@ -183,12 +184,13 @@ void TextEditor::slotOpen()
      QFileInfo fInfo(file);
      m_tbw->addTab(TE, fInfo.baseName() + "." + fInfo.completeSuffix());
      setWindowTitle(fInfo.baseName() + "." + fInfo.completeSuffix());
-     m_StringList.push_back(fInfo.baseName());
+     m_StringList.push_back(fInfo.absoluteFilePath());
      m_StringListModel->setStringList(m_StringList);
      new Highlighter("Syntax.xml", fInfo.completeSuffix(), TE->document());
      file.close();
      m_tbw->setCurrentIndex(m_tbw->count() - 1);
      m_VectorFlagsChanged.push_back(false);
+     m_VectorFlagsNewDoc.push_back(false);
      connect(TE, SIGNAL(textChanged()), this, SLOT(slotChanged()));
 }
 
@@ -199,8 +201,15 @@ void TextEditor::slotChanged()
 
 void TextEditor::slotSave()
 {
+    if(m_VectorFlagsNewDoc[m_tbw->currentIndex()])
+    {
+        slotSaveAs();
+        m_VectorFlagsNewDoc[m_tbw->currentIndex()] = false;
+        return;
+    }
     QTextEdit* TE = (QTextEdit*)m_tbw->currentWidget();
-    QFile file(m_tbw->tabText(0));
+    qDebug() << "!!!" << m_StringList.at(m_tbw->currentIndex());
+    QFile file(m_StringList.at(m_tbw->currentIndex()));
     if (file.open(QIODevice::WriteOnly)) {
         QTextStream(&file) << TE->toPlainText();
         file.close();
@@ -210,6 +219,7 @@ void TextEditor::slotSave()
 
 void TextEditor::slotSaveAs()
 {
+    m_VectorFlagsNewDoc[m_tbw->currentIndex()] = false;
     QTextEdit* TE = (QTextEdit*)m_tbw->currentWidget();
     QString str = QFileDialog::getSaveFileName(0, m_tbw->tabText(0), QString(), tr("TXT file(*.txt);;CPP file(*.cpp);;H file (*.h)"), 0);
     QFile file(str);
@@ -244,7 +254,11 @@ void TextEditor::slotSaveAll()
 //    for(auto &flag : m_VectorFlagsChanged)
 //        flag = false;
     for(int i = 0; i < m_VectorFlagsChanged.size(); ++i)
+    {
         m_VectorFlagsChanged[i] = false;
+        m_VectorFlagsNewDoc[i] = false;
+    }
+
 }
 
 void TextEditor::slotClose()
@@ -275,6 +289,7 @@ void TextEditor::slotClose()
     m_StringList.removeAt(p_Ind);
     m_StringListModel->setStringList(m_StringList);
     m_VectorFlagsChanged.erase(m_VectorFlagsChanged.begin() + p_Ind);
+    m_VectorFlagsNewDoc.erase(m_VectorFlagsNewDoc.begin() + p_Ind);
 }
 
 void TextEditor::slotCloseAll()
@@ -308,6 +323,7 @@ void TextEditor::slotCloseAll()
         else m_tbw->removeTab(0);
         m_StringList.removeAt(0);
         m_VectorFlagsChanged.erase(m_VectorFlagsChanged.begin());
+        m_VectorFlagsNewDoc.erase(m_VectorFlagsNewDoc.begin());
         m_StringListModel->setStringList(m_StringList);
     }
     m_tbw->setWindowTitle("TextEditor");
@@ -394,7 +410,7 @@ void TextEditor::slotCloseTab(int p_Ind)
     m_StringList.removeAt(p_Ind);
     m_StringListModel->setStringList(m_StringList);
     m_VectorFlagsChanged.erase(m_VectorFlagsChanged.begin() + p_Ind);
-
+    m_VectorFlagsNewDoc.erase(m_VectorFlagsNewDoc.begin() + p_Ind);
 }
 
 void TextEditor::slotSelectCPP()
@@ -431,6 +447,7 @@ void TextEditor::dropEvent(QDropEvent *pe)
          m_StringListModel->setStringList(m_StringList);
          new Highlighter("Syntax.xml", fInfo.completeSuffix(), TE->document());
          m_VectorFlagsChanged.push_back(false);
+         m_VectorFlagsNewDoc.push_back(false);
          file.close();
          connect(TE, SIGNAL(textChanged()), this, SLOT(slotChanged()));
     }

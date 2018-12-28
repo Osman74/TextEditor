@@ -50,6 +50,7 @@ private:
     QStringListModel* m_StringListModel;
     QStringList m_StringList;
     std::vector<bool> m_VectorFlagsChanged;
+    std::vector<bool> m_VectorFlagsNewDoc;
 
     QDockWidget* Explorer;
     QDockWidget* ExplorerOpenDocs;
